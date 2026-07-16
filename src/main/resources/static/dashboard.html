@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Dashboard — SpendWise</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* ── Alert Banner ── */
+    .alert-banner {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      font-weight: 500;
+      background: #ff980022;
+      border: 1px solid #ff9800;
+      color: #ff9800;
+    }
+    .alert-banner.danger {
+      background: #ff444422;
+      border-color: #ff4444;
+      color: #ff4444;
+    }
+    .alert-banner button {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ── Export Buttons ── */
+    .export-btn {
+      background: #2a2f45;
+      color: #ccc;
+      border: 1px solid #3a3f55;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .export-btn:hover { background: #3a3f55; color: #fff; }
+
+    /* ── Donut Chart container ── */
+    .donut-wrap {
+      position: relative;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .donut-center {
+      position: absolute;
+      text-align: center;
+      pointer-events: none;
+    }
+    .donut-center .donut-total {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f5a623;
+    }
+    .donut-center .donut-label {
+      font-size: 11px;
+      color: #888;
+    }
+
+    /* ── Grid 3 for charts row ── */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 1100px) {
+      .grid-3 { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 700px) {
+      .grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">
+        <div class="brand-icon">💰</div>
+        <div>
+          <div class="brand-name">Spend<span>Wise</span></div>
+          <div class="brand-tag">Expense Tracker</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Dashboard
+      </a>
+      <a href="expenses.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"/>
+          <line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        Expenses
+      </a>
+      <a href="add-expense.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        Add Expense
+      </a>
+      <div class="nav-section-label">Insights</div>
+      <a href="analytics.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        Analytics
+      </a>
+      <a href="upload.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 16 12 12 8 16"/>
+          <line x1="12" y1="12" x2="12" y2="21"/>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+        </svg>
+        Upload CSV
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sb-avatar">U</div>
+        <div class="user-info">
+          <div class="user-name" id="sb-username">User</div>
+          <div class="user-role">Member</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" id="menu-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <span class="topbar-title">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀️</span></button>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="page">
+
+      <!-- ── Budget Alert Banner (NEW) ── -->
+      <div id="alert-banner" class="alert-banner">
+        <span id="alert-msg"></span>
+        <button onclick="document.getElementById('alert-banner').style.display='none'">✕</button>
+      </div>
+
+      <!-- ── Stats Row ── -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon ic-gold">💰</div>
+          <div>
+            <div class="stat-label">Total Spent</div>
+            <div class="stat-value gold" id="st-total">₹0</div>
+            <div class="stat-hint">All time</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ic-blue">📅</div>
+          <div>
+            <div class="stat-label">This Month</div>
+            <div class="stat-value" id="st-month">₹0</div>
+            <div class="stat-hint" id="st-month-hint"></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ic-green">🧾</div>
+          <div>
+            <div class="stat-label">Transactions</div>
+            <div class="stat-value" id="st-tx">0</div>
+            <div class="stat-hint">Total expenses</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ic-amber">🔁</div>
+          <div>
+            <div class="stat-label">Recurring</div>
+            <div class="stat-value" id="st-rec">0</div>
+            <div class="stat-hint">Active subscriptions</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Budget + Top Categories ── -->
+      <div class="grid-2 mb-4">
+        <div>
+          <div id="budget-section"></div>
+          <div class="card mt-4">
+            <div class="card-head">
+              <div><div class="card-title">⚙️ Set Monthly Budget</div></div>
+            </div>
+            <div class="d-flex gap-2">
+              <input id="budget-input" class="form-control" type="number" min="1" placeholder="e.g. 15000"/>
+              <button class="btn btn-primary" onclick="saveBudget()">Save</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">🏆 Top Categories</div><div class="card-sub">Where your money goes</div></div>
+          </div>
+          <div id="top-cats" class="cat-list"></div>
+        </div>
+      </div>
+
+      <!-- ── Charts Row (NEW: 3 cards) ── -->
+      <div class="grid-3">
+
+        <!-- Bar Chart -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">📊 Monthly Overview</div>
+              <div class="card-sub">Last 6 months</div>
+            </div>
+          </div>
+          <div class="chart-wrap" style="height:200px">
+            <canvas id="mini-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Donut Chart (NEW) -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">🥧 Category Breakdown</div>
+              <div class="card-sub">This month</div>
+            </div>
+          </div>
+          <div class="donut-wrap">
+            <canvas id="donut-chart"></canvas>
+            <div class="donut-center">
+              <div class="donut-total" id="donut-total">₹0</div>
+              <div class="donut-label">This Month</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Smart Insights -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">💡 Smart Insights</div>
+              <div class="card-sub">Personalized tips</div>
+            </div>
+          </div>
+          <div id="insights-list" class="insight-list"></div>
+        </div>
+
+      </div>
+
+      <!-- ── Recent Expenses (NEW: export buttons) ── -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">🕐 Recent Expenses</div>
+            <div class="card-sub">Last 5 transactions</div>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="export-btn" onclick="exportCSV()">📥 CSV</button>
+            <button class="export-btn" onclick="exportPDF()">📄 PDF</button>
+            <a href="expenses.html" class="btn btn-secondary btn-sm">View All</a>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+            <tr>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Date</th>
+            </tr>
+            </thead>
+            <tbody id="recent-tbody">
+            <tr>
+              <td colspan="4">
+                <div class="empty">
+                  <div class="empty-icon">💸</div>
+                  <p class="empty-title">Loading…</p>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- end .page -->
+  </div><!-- end .main -->
+</div><!-- end .app -->
+
+<script src="script.js"></script>
+
+<script>
+  // ══════════════════════════════════════════
+  //  NEW FEATURES — paste these into script.js
+  //  if you prefer, or leave them here
+  // ══════════════════════════════════════════
+
+  // ── 1. DONUT CHART ────────────────────────
+  function renderDonutChart(expenses) {
+    const now = new Date();
+    // Filter only this month's expenses
+    const thisMonth = expenses.filter(e => {
+      const d = new Date(e.date);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+
+    const totals = {};
+    thisMonth.forEach(e => {
+      totals[e.category] = (totals[e.category] || 0) + Number(e.amount);
+    });
+
+    const labels = Object.keys(totals);
+    const data   = Object.values(totals);
+    const total  = data.reduce((a, b) => a + b, 0);
+    const colors = ['#f5a623','#4ecdc4','#ff6b6b','#a78bfa','#34d399','#60a5fa','#fb923c'];
+
+    // Update center label
+    document.getElementById('donut-total').textContent = '₹' + total.toLocaleString('en-IN');
+
+    const ctx = document.getElementById('donut-chart').getContext('2d');
+    if (window._donutChart) window._donutChart.destroy();
+
+    if (labels.length === 0) {
+      ctx.clearRect(0, 0, 300, 200);
+      return;
+    }
+
+    window._donutChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: colors.slice(0, labels.length),
+          borderColor: 'transparent',
+          borderWidth: 0,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        cutout: '68%',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#aaa',
+              padding: 10,
+              font: { size: 11 },
+              boxWidth: 12
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const pct = ((ctx.parsed / total) * 100).toFixed(1);
+                return ` ₹${ctx.parsed.toLocaleString('en-IN')} (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ── 2. BUDGET ALERT ───────────────────────
+  function checkBudgetAlert(spent, limit) {
+    if (!limit || limit <= 0) return;
+    const pct    = (spent / limit) * 100;
+    const banner = document.getElementById('alert-banner');
+    const msg    = document.getElementById('alert-msg');
+
+    if (pct >= 100) {
+      banner.style.display = 'flex';
+      banner.classList.add('danger');
+      msg.textContent = `🚨 Budget exceeded! You spent ₹${spent.toLocaleString('en-IN')} of ₹${limit.toLocaleString('en-IN')}`;
+    } else if (pct >= 80) {
+      banner.style.display = 'flex';
+      banner.classList.remove('danger');
+      const remaining = (limit - spent).toLocaleString('en-IN');
+      msg.textContent = `⚠️ ${pct.toFixed(0)}% of budget used — only ₹${remaining} left this month`;
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  // ── 3. EXPORT CSV ─────────────────────────
+  function exportCSV() {
+    if (!window.allExpenses || allExpenses.length === 0) {
+      alert('No expenses to export.');
+      return;
+    }
+    const rows = [['Title','Category','Amount','Date','Notes']];
+    allExpenses.forEach(e => {
+      rows.push([
+        e.title      || '',
+        e.category   || '',
+        e.amount     || 0,
+        e.date       || '',
+        e.notes      || ''
+      ]);
+    });
+
+    const csv  = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `SpendWise_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── 4. EXPORT PDF ─────────────────────────
+  function exportPDF() {
+    if (!window.allExpenses || allExpenses.length === 0) {
+      alert('No expenses to export.');
+      return;
+    }
+
+    const total = allExpenses.reduce((s, e) => s + Number(e.amount), 0);
+    const now   = new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+
+    // Group by category for summary
+    const catTotals = {};
+    allExpenses.forEach(e => {
+      catTotals[e.category] = (catTotals[e.category] || 0) + Number(e.amount);
+    });
+    const catRows = Object.entries(catTotals)
+      .sort((a, b) => b[1] - a[1])
+      .map(([cat, amt]) => `<tr><td>${cat}</td><td>₹${amt.toLocaleString('en-IN')}</td></tr>`)
+      .join('');
+
+    const expRows = allExpenses.map(e => `
+      <tr>
+        <td>${e.title}</td>
+        <td>${e.category}</td>
+        <td>₹${Number(e.amount).toLocaleString('en-IN')}</td>
+        <td>${e.date}</td>
+        <td>${e.notes || '—'}</td>
+      </tr>`).join('');
+
+    const win = window.open('', '_blank');
+    win.document.write(`
+      <!DOCTYPE html><html><head>
+      <title>SpendWise Report</title>
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; padding: 36px; color: #333; background: #fff; }
+        h1 { color: #f5a623; font-size: 26px; margin-bottom: 4px; }
+        .sub { color: #888; font-size: 13px; margin-bottom: 24px; }
+        .summary { display: flex; gap: 12px; margin-bottom: 28px; }
+        .box { flex: 1; background: #f8f9fa; padding: 16px; border-radius: 10px; text-align: center; border: 1px solid #eee; }
+        .box .val { font-size: 22px; font-weight: 700; color: #f5a623; }
+        .box .lbl { font-size: 12px; color: #888; margin-top: 4px; }
+        h2 { font-size: 15px; color: #333; margin: 0 0 10px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
+        th { background: #1a1f2e; color: white; padding: 10px 12px; text-align: left; font-size: 13px; }
+        td { padding: 9px 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+        tr:nth-child(even) td { background: #fafafa; }
+        .footer { color: #bbb; font-size: 11px; text-align: center; margin-top: 20px; }
+      </style></head><body>
+      <h1>💰 SpendWise — Expense Report</h1>
+      <p class="sub">Generated on ${now}</p>
+
+      <div class="summary">
+        <div class="box"><div class="val">₹${total.toLocaleString('en-IN')}</div><div class="lbl">Total Spent</div></div>
+        <div class="box"><div class="val">${allExpenses.length}</div><div class="lbl">Transactions</div></div>
+        <div class="box"><div class="val">${Object.keys(catTotals).length}</div><div class="lbl">Categories</div></div>
+      </div>
+
+      <h2>📊 By Category</h2>
+      <table>
+        <thead><tr><th>Category</th><th>Total</th></tr></thead>
+        <tbody>${catRows}</tbody>
+      </table>
+
+      <h2>🧾 All Transactions</h2>
+      <table>
+        <thead><tr><th>Title</th><th>Category</th><th>Amount</th><th>Date</th><th>Notes</th></tr></thead>
+        <tbody>${expRows}</tbody>
+      </table>
+
+      <p class="footer">SpendWise — Your personal expense tracker</p>
+      </body></html>
+    `);
+    win.document.close();
+    setTimeout(() => win.print(), 500);
+  }
+
+  // ══════════════════════════════════════════
+  //  HOW TO CONNECT TO YOUR EXISTING script.js
+  //  ─────────────────────────────────────────
+  //  In your script.js, after you load expenses,
+  //  add these 2 lines:
+  //
+  //    renderDonutChart(allExpenses);
+  //    checkBudgetAlert(monthSpent, budgetLimit);
+  //
+  //  Make sure allExpenses is a global variable
+  //  (window.allExpenses = [...]) so these
+  //  functions can access it.
+  // ══════════════════════════════════════════
+</script>
+</body>
+</html>

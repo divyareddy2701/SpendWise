@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Upload CSV — SpendWise</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-mark"><div class="brand-icon">💰</div><div><div class="brand-name">Spend<span>Wise</span></div><div class="brand-tag">Expense Tracker</div></div></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="expenses.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Expenses</a>
+      <a href="add-expense.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Add Expense</a>
+      <div class="nav-section-label">Insights</div>
+      <a href="analytics.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</a>
+      <a href="upload.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>Upload CSV</a>
+    </nav>
+    <div class="sidebar-footer"><div class="user-card"><div class="user-avatar" id="sb-avatar">U</div><div class="user-info"><div class="user-name" id="sb-username">User</div><div class="user-role">Member</div></div></div></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" id="menu-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <span class="topbar-title">Upload CSV</span>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀️</span></button>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="page">
+      <div style="max-width:640px;margin:0 auto">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">Import Expenses from CSV</div><div class="card-sub">Upload a CSV to bulk-add your expenses</div></div></div>
+          <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <input type="file" id="file-input" accept=".csv" style="display:none"/>
+            <div class="drop-zone-icon">📂</div>
+            <div class="drop-zone-title">Drop your CSV here</div>
+            <div class="drop-zone-sub">or click to browse</div>
+            <div class="drop-zone-hint">Max file size: 10MB · Format: CSV only</div>
+          </div>
+          <div id="file-info" class="hidden mt-4">
+            <div class="alert alert-info">
+              <span style="font-size:18px">📄</span>
+              <div><div class="alert-title" id="file-name">file.csv</div><div class="alert-text" id="file-size">0 KB</div></div>
+            </div>
+            <button class="btn btn-primary btn-full" id="btn-upload">⬆ Upload &amp; Import</button>
+          </div>
+        </div>
+
+        <div class="card mt-4">
+          <div class="card-title" style="margin-bottom:14px">📋 CSV Format Guide</div>
+          <p class="text-sm text-muted" style="margin-bottom:12px">Your CSV must have these exact column headers (first row):</p>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-family:monospace;font-size:13px;overflow-x:auto;color:var(--gold)">
+            title,amount,category,date,recurring
+          </div>
+          <div class="insight-list mt-4">
+            <div class="insight-item"><span class="insight-icon">📝</span><strong>title</strong> — Expense description (text)</div>
+            <div class="insight-item"><span class="insight-icon">💰</span><strong>amount</strong> — Number only, no ₹ symbol (e.g. 450.00)</div>
+            <div class="insight-item"><span class="insight-icon">🏷️</span><strong>category</strong> — Food, Transport, Shopping, Health, Utilities, Education, Entertainment, Other</div>
+            <div class="insight-item"><span class="insight-icon">📅</span><strong>date</strong> — Format: YYYY-MM-DD (e.g. 2025-03-15)</div>
+            <div class="insight-item"><span class="insight-icon">🔁</span><strong>recurring</strong> — true or false (lowercase)</div>
+          </div>
+          <div class="mt-4">
+            <button class="btn btn-secondary btn-sm" onclick="downloadSample()">⬇ Download Sample CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

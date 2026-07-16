@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Add Expense — SpendWise</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-mark"><div class="brand-icon">💰</div><div><div class="brand-name">Spend<span>Wise</span></div><div class="brand-tag">Expense Tracker</div></div></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="expenses.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Expenses</a>
+      <a href="add-expense.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Add Expense</a>
+      <div class="nav-section-label">Insights</div>
+      <a href="analytics.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</a>
+      <a href="upload.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>Upload CSV</a>
+    </nav>
+    <div class="sidebar-footer"><div class="user-card"><div class="user-avatar" id="sb-avatar">U</div><div class="user-info"><div class="user-name" id="sb-username">User</div><div class="user-role">Member</div></div></div></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" id="menu-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <span class="topbar-title">Add Expense</span>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀️</span></button>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="page">
+      <div style="max-width:600px;margin:0 auto">
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">New Expense</div><div class="card-sub">Fill in the details below</div></div>
+          </div>
+          <form id="form-expense">
+            <div class="form-group">
+              <label class="form-label" for="exp-title">Title *</label>
+              <input id="exp-title" class="form-control" type="text" placeholder="e.g. Grocery at DMart" required/>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="exp-amount">Amount (₹) *</label>
+                <input id="exp-amount" class="form-control" type="number" min="0.01" step="0.01" placeholder="0.00" required/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="exp-date">Date *</label>
+                <input id="exp-date" class="form-control" type="date" required/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="exp-category">Category *</label>
+              <select id="exp-category" class="form-control" required>
+                <option value="" disabled selected>Select category</option>
+                <option value="Food">🍔 Food</option>
+                <option value="Transport">🚗 Transport</option>
+                <option value="Shopping">🛍️ Shopping</option>
+                <option value="Health">💊 Health</option>
+                <option value="Utilities">💡 Utilities</option>
+                <option value="Education">📚 Education</option>
+                <option value="Entertainment">🎬 Entertainment</option>
+                <option value="Other">📦 Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-check">
+                <input type="checkbox" id="exp-recurring"/>
+                <div>
+                  <div style="font-weight:600;font-size:14px">Recurring Expense</div>
+                  <div class="form-hint">Mark if this repeats monthly (rent, EMI, subscriptions)</div>
+                </div>
+              </label>
+            </div>
+            <div class="d-flex gap-2" style="flex-wrap:wrap">
+              <button type="submit" class="btn btn-primary btn-full">Add Expense</button>
+              <a href="expenses.html" class="btn btn-secondary btn-full" style="text-align:center">View All</a>
+            </div>
+          </form>
+        </div>
+
+        <div class="card mt-4">
+          <div class="card-title" style="margin-bottom:12px">💡 Quick Tips</div>
+          <div class="insight-list">
+            <div class="insight-item"><span class="insight-icon">🔁</span>Mark rent, Netflix, EMIs as <strong>Recurring</strong> — they'll be highlighted.</div>
+            <div class="insight-item"><span class="insight-icon">📅</span>Use the correct date for accurate monthly analytics.</div>
+            <div class="insight-item"><span class="insight-icon">📁</span>Have many expenses? Use <a href="upload.html" style="color:var(--gold);font-weight:600">Upload CSV</a> for bulk import.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

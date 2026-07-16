@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Analytics — SpendWise</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-mark"><div class="brand-icon">💰</div><div><div class="brand-name">Spend<span>Wise</span></div><div class="brand-tag">Expense Tracker</div></div></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="expenses.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Expenses</a>
+      <a href="add-expense.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Add Expense</a>
+      <div class="nav-section-label">Insights</div>
+      <a href="analytics.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</a>
+      <a href="upload.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>Upload CSV</a>
+    </nav>
+    <div class="sidebar-footer"><div class="user-card"><div class="user-avatar" id="sb-avatar">U</div><div class="user-info"><div class="user-name" id="sb-username">User</div><div class="user-role">Member</div></div></div></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" id="menu-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <span class="topbar-title">Analytics</span>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀️</span></button>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="page">
+      <div class="stats-row mb-4">
+        <div class="stat-card">
+          <div class="stat-icon ic-gold">💰</div>
+          <div><div class="stat-label">Total Spent</div><div class="stat-value gold" id="an-total">₹0</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ic-blue">📊</div>
+          <div><div class="stat-label">Avg per Expense</div><div class="stat-value" id="an-avg">₹0</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ic-red">🔝</div>
+          <div><div class="stat-label">Largest Expense</div><div class="stat-value" id="an-max">₹0</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ic-green">📅</div>
+          <div><div class="stat-label">This Month</div><div class="stat-value" id="an-month">₹0</div></div>
+        </div>
+      </div>
+
+      <div class="grid-2 mb-4">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">Category Breakdown</div><div class="card-sub">Spending by category</div></div></div>
+          <div class="chart-wrap"><canvas id="donut-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">Monthly Spending</div><div class="card-sub">Last 6 months</div></div></div>
+          <div class="chart-wrap"><canvas id="bar-chart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-head"><div><div class="card-title">Spending Trend</div><div class="card-sub">Daily cumulative view for current month</div></div></div>
+        <div class="chart-wrap" style="height:220px"><canvas id="line-chart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

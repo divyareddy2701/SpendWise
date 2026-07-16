@@ -1,0 +1,516 @@
+bash
+
+cat > /mnt/user-data/outputs/expenses.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Expenses — SpendWise</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* ── Date range row ── */
+    .date-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .date-range label { font-size: 12px; color: var(--text-muted, #888); white-space: nowrap; }
+    .date-range input[type="date"] {
+      background: var(--card, #1e2235);
+      border: 1px solid var(--border, #3a3f55);
+      color: var(--text, #fff);
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+    .btn-clear-dates {
+      background: none;
+      border: 1px solid var(--border, #3a3f55);
+      color: var(--text-muted, #888);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-clear-dates:hover { background: var(--border, #3a3f55); color: var(--text, #fff); }
+
+    /* ── Category summary pills ── */
+    .cat-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .cat-pill {
+      background: var(--card, #1e2235);
+      border: 1px solid var(--border, #3a3f55);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: var(--text-muted, #aaa);
+    }
+    .cat-pill strong { color: var(--gold, #f5a623); }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+    .page-btn {
+      background: var(--card, #1e2235);
+      border: 1px solid var(--border, #3a3f55);
+      color: var(--text, #fff);
+      padding: 7px 13px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.15s;
+      min-width: 36px;
+    }
+    .page-btn:hover:not(:disabled) { background: var(--border, #3a3f55); }
+    .page-btn.active {
+      background: var(--gold, #f5a623);
+      border-color: var(--gold, #f5a623);
+      color: #1a1200;
+      font-weight: 700;
+    }
+    .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .page-info { font-size: 12px; color: var(--text-muted, #888); margin: 0 6px; }
+
+    /* ── Export PDF btn ── */
+    .export-btn {
+      background: var(--card, #2a2f45);
+      color: var(--text-muted, #ccc);
+      border: 1px solid var(--border, #3a3f55);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .export-btn:hover { background: var(--border, #3a3f55); color: var(--text, #fff); }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">
+        <div class="brand-icon">💰</div>
+        <div>
+          <div class="brand-name">Spend<span>Wise</span></div>
+          <div class="brand-tag">Expense Tracker</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="expenses.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Expenses
+      </a>
+      <a href="add-expense.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Add Expense
+      </a>
+      <div class="nav-section-label">Insights</div>
+      <a href="analytics.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+      <a href="upload.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        Upload CSV
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sb-avatar">U</div>
+        <div class="user-info">
+          <div class="user-name" id="sb-username">User</div>
+          <div class="user-role">Member</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" id="menu-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <span class="topbar-title">Expenses</span>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀️</span></button>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="page">
+
+      <!-- TOP ROW: count + export buttons -->
+      <div class="d-flex justify-between align-center mb-4" style="flex-wrap:wrap;gap:10px">
+        <div>
+          <span id="exp-count" class="text-sm text-muted">0 expenses</span>
+          &nbsp;·&nbsp;
+          <span id="exp-total" class="text-sm fw-bold gold">₹0</span>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="export-btn" id="btn-export">📥 CSV</button>
+          <button class="export-btn" id="btn-pdf">📄 PDF</button>
+          <a href="add-expense.html" class="btn btn-primary btn-sm">+ Add Expense</a>
+        </div>
+      </div>
+
+      <!-- FILTER BAR (existing filters) -->
+      <div class="filter-bar">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input id="inp-search" class="form-control" placeholder="Search expenses…"/>
+        </div>
+        <select id="sel-category" class="form-control" style="width:auto">
+          <option value="">All Categories</option>
+          <option value="Food">🍔 Food</option>
+          <option value="Transport">🚗 Transport</option>
+          <option value="Shopping">🛍️ Shopping</option>
+          <option value="Health">💊 Health</option>
+          <option value="Utilities">💡 Utilities</option>
+          <option value="Education">📚 Education</option>
+          <option value="Entertainment">🎬 Entertainment</option>
+          <option value="Other">📦 Other</option>
+        </select>
+        <select id="sel-sort" class="form-control" style="width:auto">
+          <option value="date-desc">Newest First</option>
+          <option value="date-asc">Oldest First</option>
+          <option value="amt-desc">Highest Amount</option>
+          <option value="amt-asc">Lowest Amount</option>
+        </select>
+        <label class="form-check" style="white-space:nowrap">
+          <input type="checkbox" id="chk-rec"/> Recurring only
+        </label>
+      </div>
+
+      <!-- DATE RANGE FILTER (NEW) -->
+      <div class="date-range mb-4" style="margin-top:10px">
+        <label>From:</label>
+        <input type="date" id="date-from"/>
+        <label>To:</label>
+        <input type="date" id="date-to"/>
+        <button class="btn-clear-dates" onclick="clearDates()">✕ Clear Dates</button>
+      </div>
+
+      <!-- CATEGORY SUMMARY PILLS (NEW) -->
+      <div id="cat-summary" class="cat-summary"></div>
+
+      <!-- EXPENSES TABLE -->
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+            <tr>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th style="text-align:right">Actions</th>
+            </tr>
+            </thead>
+            <tbody id="exp-tbody">
+            <tr>
+              <td colspan="6">
+                <div class="empty">
+                  <div class="empty-icon">💸</div>
+                  <p class="empty-title">Loading…</p>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PAGINATION (NEW) -->
+      <div id="pagination" class="pagination"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal (same as before) -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit Expense</div>
+    <input type="hidden" id="edit-id"/>
+    <div class="form-group">
+      <label class="form-label">Title</label>
+      <input id="edit-title" class="form-control" type="text" required/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Amount (₹)</label>
+        <input id="edit-amount" class="form-control" type="number" min="0.01" step="0.01" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input id="edit-date" class="form-control" type="date" required/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select id="edit-category" class="form-control">
+        <option value="Food">🍔 Food</option>
+        <option value="Transport">🚗 Transport</option>
+        <option value="Shopping">🛍️ Shopping</option>
+        <option value="Health">💊 Health</option>
+        <option value="Utilities">💡 Utilities</option>
+        <option value="Education">📚 Education</option>
+        <option value="Entertainment">🎬 Entertainment</option>
+        <option value="Other">📦 Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-check">
+        <input type="checkbox" id="edit-recurring"/>
+        <div>
+          <div style="font-weight:600;font-size:14px">Recurring Expense</div>
+        </div>
+      </label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+<script>
+  // ══════════════════════════════════════════
+  //  NEW: Pagination + Date Filter + PDF
+  //  These override/extend initExpenses()
+  //  from script.js
+  // ══════════════════════════════════════════
+
+  const PAGE_SIZE = 10;
+  let currentPage = 1;
+  let filteredList = [];
+
+  // Override initExpenses from script.js
+  async function initExpenses() {
+    await fetchExpenses();
+    applyFilters();
+
+    document.getElementById('inp-search')  ?.addEventListener('input',  () => { currentPage = 1; applyFilters(); });
+    document.getElementById('sel-category')?.addEventListener('change', () => { currentPage = 1; applyFilters(); });
+    document.getElementById('sel-sort')    ?.addEventListener('change', () => { currentPage = 1; applyFilters(); });
+    document.getElementById('chk-rec')     ?.addEventListener('change', () => { currentPage = 1; applyFilters(); });
+    document.getElementById('date-from')   ?.addEventListener('change', () => { currentPage = 1; applyFilters(); });
+    document.getElementById('date-to')     ?.addEventListener('change', () => { currentPage = 1; applyFilters(); });
+    document.getElementById('btn-export')  ?.addEventListener('click',  () => exportCSV(filteredList));
+    document.getElementById('btn-pdf')     ?.addEventListener('click',  exportPDF);
+  }
+
+  // Override applyFilters from script.js
+  function applyFilters() {
+    const q        = (document.getElementById('inp-search')?.value   || '').toLowerCase();
+    const cat      =  document.getElementById('sel-category')?.value || '';
+    const srt      =  document.getElementById('sel-sort')?.value     || 'date-desc';
+    const rec      =  document.getElementById('chk-rec')?.checked    || false;
+    const fromDate =  document.getElementById('date-from')?.value    || '';
+    const toDate   =  document.getElementById('date-to')?.value      || '';
+
+    filteredList = [...allExpenses].filter(e => {
+      const mq   = !q        || (e.title||'').toLowerCase().includes(q) || (e.category||'').toLowerCase().includes(q);
+      const mc   = !cat      || e.category === cat;
+      const mr   = !rec      || e.recurring;
+      const mfrom= !fromDate || e.date >= fromDate;
+      const mto  = !toDate   || e.date <= toDate;
+      return mq && mc && mr && mfrom && mto;
+    });
+
+    filteredList.sort((a, b) => {
+      if (srt === 'date-desc') return new Date(b.date) - new Date(a.date);
+      if (srt === 'date-asc')  return new Date(a.date) - new Date(b.date);
+      if (srt === 'amt-desc')  return parseFloat(b.amount) - parseFloat(a.amount);
+      if (srt === 'amt-asc')   return parseFloat(a.amount) - parseFloat(b.amount);
+      return 0;
+    });
+
+    // Update count + total
+    document.getElementById('exp-count').textContent =
+      filteredList.length + ' expense' + (filteredList.length !== 1 ? 's' : '');
+    document.getElementById('exp-total').textContent =
+      '₹' + fmt(filteredList.reduce((s, e) => s + parseFloat(e.amount||0), 0));
+
+    renderCatSummary(filteredList);
+    renderPage(currentPage);
+    renderPagination();
+  }
+
+  // Render only 10 items for current page
+  function renderPage(page) {
+    const start = (page - 1) * PAGE_SIZE;
+    const end   = start + PAGE_SIZE;
+    const slice = filteredList.slice(start, end);
+    renderExpTable(slice);
+  }
+
+  // Pagination controls
+  function renderPagination() {
+    const total = Math.ceil(filteredList.length / PAGE_SIZE);
+    const el    = document.getElementById('pagination');
+    if (!el) return;
+
+    if (total <= 1) { el.innerHTML = ''; return; }
+
+    let html = '';
+
+    // Prev button
+    html += `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+
+    // Page numbers
+    for (let i = 1; i <= total; i++) {
+      // Show first, last, and pages around current
+      if (i === 1 || i === total || (i >= currentPage-2 && i <= currentPage+2)) {
+        html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+      } else if (i === currentPage-3 || i === currentPage+3) {
+        html += `<span class="page-info">…</span>`;
+      }
+    }
+
+    // Next button
+    html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===total?'disabled':''}>›</button>`;
+
+    // Page info
+    const start = (currentPage-1)*PAGE_SIZE + 1;
+    const end   = Math.min(currentPage*PAGE_SIZE, filteredList.length);
+    html += `<span class="page-info">${start}–${end} of ${filteredList.length}</span>`;
+
+    el.innerHTML = html;
+  }
+
+  function goPage(page) {
+    const total = Math.ceil(filteredList.length / PAGE_SIZE);
+    if (page < 1 || page > total) return;
+    currentPage = page;
+    renderPage(currentPage);
+    renderPagination();
+    // Scroll to top of table
+    document.querySelector('.tbl-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Category summary pills
+  function renderCatSummary(list) {
+    const el = document.getElementById('cat-summary');
+    if (!el || !list.length) { el.innerHTML = ''; return; }
+
+    const map = {};
+    list.forEach(e => { map[e.category] = (map[e.category]||0) + parseFloat(e.amount||0); });
+
+    el.innerHTML = Object.entries(map)
+      .sort((a,b) => b[1]-a[1])
+      .map(([cat, amt]) =>
+        `<div class="cat-pill">${cat}: <strong>₹${fmt(amt)}</strong></div>`
+      ).join('');
+  }
+
+  // Clear date filters
+  function clearDates() {
+    document.getElementById('date-from').value = '';
+    document.getElementById('date-to').value   = '';
+    currentPage = 1;
+    applyFilters();
+  }
+
+  // PDF Export
+  function exportPDF() {
+    if (!filteredList.length) { toast('No expenses to export', 'error'); return; }
+
+    const total = filteredList.reduce((s,e) => s+parseFloat(e.amount||0), 0);
+    const now   = new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+
+    const catTotals = {};
+    filteredList.forEach(e => { catTotals[e.category] = (catTotals[e.category]||0) + parseFloat(e.amount||0); });
+
+    const catRows = Object.entries(catTotals).sort((a,b)=>b[1]-a[1])
+      .map(([cat,amt]) => `<tr><td>${cat}</td><td>₹${fmt(amt)}</td></tr>`).join('');
+
+    const expRows = filteredList.map(e => `
+      <tr>
+        <td>${e.title||'—'}</td>
+        <td>${e.category||'—'}</td>
+        <td>₹${fmt(e.amount)}</td>
+        <td>${e.date||'—'}</td>
+        <td>${e.recurring ? '🔁 Recurring' : 'One-time'}</td>
+      </tr>`).join('');
+
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head>
+    <title>SpendWise Expenses</title>
+    <style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:Arial,sans-serif;padding:36px;color:#333}
+      h1{color:#f5a623;font-size:24px;margin-bottom:4px}
+      .sub{color:#888;font-size:13px;margin-bottom:20px}
+      .summary{display:flex;gap:12px;margin-bottom:24px}
+      .box{flex:1;background:#f8f9fa;padding:14px;border-radius:8px;text-align:center;border:1px solid #eee}
+      .box .val{font-size:20px;font-weight:700;color:#f5a623}
+      .box .lbl{font-size:11px;color:#888;margin-top:3px}
+      h2{font-size:14px;margin:0 0 10px;color:#555}
+      table{width:100%;border-collapse:collapse;margin-bottom:24px}
+      th{background:#1a1f2e;color:white;padding:9px 12px;text-align:left;font-size:12px}
+      td{padding:8px 12px;border-bottom:1px solid #eee;font-size:12px}
+      tr:nth-child(even) td{background:#fafafa}
+      .footer{color:#bbb;font-size:11px;text-align:center;margin-top:16px}
+    </style></head><body>
+    <h1>💰 SpendWise — Expense Report</h1>
+    <p class="sub">Generated on ${now} · ${filteredList.length} transactions</p>
+    <div class="summary">
+      <div class="box"><div class="val">₹${fmt(total)}</div><div class="lbl">Total Spent</div></div>
+      <div class="box"><div class="val">${filteredList.length}</div><div class="lbl">Transactions</div></div>
+      <div class="box"><div class="val">${Object.keys(catTotals).length}</div><div class="lbl">Categories</div></div>
+    </div>
+    <h2>📊 By Category</h2>
+    <table><thead><tr><th>Category</th><th>Total</th></tr></thead><tbody>${catRows}</tbody></table>
+    <h2>🧾 All Transactions</h2>
+    <table>
+      <thead><tr><th>Title</th><th>Category</th><th>Amount</th><th>Date</th><th>Type</th></tr></thead>
+      <tbody>${expRows}</tbody>
+    </table>
+    <p class="footer">SpendWise — Your personal expense tracker</p>
+    </body></html>`);
+    win.document.close();
+    setTimeout(() => win.print(), 500);
+  }
+
+  // Close modal on overlay click
+  document.addEventListener('click', e => {
+    if (e.target.id === 'edit-modal') closeEditModal();
+  });
+</script>
+</body>
+</html>
+
