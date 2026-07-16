@@ -1,10 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════
    SpendWise — script.js   (Complete, production-quality)
-   API base: http://localhost:8081/api
+   const API = 'https://spendwise-backend-p46w.onrender.com/api';
 ═══════════════════════════════════════════════════════════════ */
 
 // ── Config ───────────────────────────────────────────────────────
-const API        = 'http://localhost:8081/api';
+const API = '/api';
 const USER_KEY   = 'sw_user';
 const BUDGET_KEY = 'sw_budget';
 const THEME_KEY  = 'sw_theme';
